@@ -3,10 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import { Helmet } from "react-helmet";
-import type { Teaching } from "@shared/schema";
+import type { Teaching as TeachingType } from "@shared/schema";
 
 export default function Teaching() {
-  const { data: materials, isLoading } = useQuery<Teaching[]>({
+  const { data: materials, isLoading } = useQuery<TeachingType[]>({
     queryKey: ["/api/teaching"]
   });
 
@@ -34,7 +34,7 @@ export default function Teaching() {
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
             {materials?.map((material) => (
-              <Card key={material.id}>
+              <Card key={material._id?.toString()}>
                 <CardHeader>
                   <CardTitle>{material.course}</CardTitle>
                 </CardHeader>
