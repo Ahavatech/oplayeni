@@ -14,6 +14,7 @@ import Publications from "@/pages/Publications";
 import Talks from "@/pages/Talks";
 import Contact from "@/pages/Contact";
 import NotFound from "@/pages/not-found";
+import AdminLogin from "@/pages/admin/Login";
 
 function Router() {
   return (
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/publications" component={Publications} />
       <Route path="/talks" component={Talks} />
       <Route path="/contact" component={Contact} />
+      <Route path="/admin" component={AdminLogin} />
       <Route component={NotFound} />
     </Switch>
   );

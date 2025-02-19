@@ -2,6 +2,12 @@ import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const admins = pgTable("admins", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull(),
+  password: text("password").notNull(),
+});
+
 export const publications = pgTable("publications", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -28,9 +34,13 @@ export const talks = pgTable("talks", {
   description: text("description")
 });
 
+export const insertAdminSchema = createInsertSchema(admins).omit({ id: true });
 export const insertPublicationSchema = createInsertSchema(publications).omit({ id: true });
 export const insertTeachingSchema = createInsertSchema(teaching).omit({ id: true });
 export const insertTalkSchema = createInsertSchema(talks).omit({ id: true });
+
+export type Admin = typeof admins.$inferSelect;
+export type InsertAdmin = z.infer<typeof insertAdminSchema>;
 
 export type Publication = typeof publications.$inferSelect;
 export type InsertPublication = z.infer<typeof insertPublicationSchema>;
