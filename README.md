@@ -1,37 +1,4 @@
-# Academic Portfolio - Prof. Olawanle Patrick Layeni
-
-A professional academic portfolio website showcasing research, teaching, and publications in mathematics, specifically focusing on solid mechanics and continuum mechanics.
-
-## Features
-
-- Professional academic profile presentation
-- Research areas and publications showcase
-- Teaching materials and course information
-- Upcoming talks and events
-- Contact information
-- Admin interface for content management
-
-## Technology Stack
-
-- Frontend: React with TypeScript
-- Styling: Tailwind CSS with shadcn/ui components
-- Backend: Express.js
-- Authentication: Session-based auth for admin access
-- Data Storage: In-memory storage (configurable for PostgreSQL)
-
-## Local Development Setup
-
-### Prerequisites
-
-- Node.js (v18 or v20)
-- npm (comes with Node.js)
-- Git
-
-### Installation
-
-1. Clone the repository
-```bash
-git clone [your-github-repo-url]
+git clone [your-repository-url]
 cd [repository-name]
 ```
 
@@ -40,16 +7,43 @@ cd [repository-name]
 npm install
 ```
 
-3. Start the development server
+3. Set up your environment variables by creating a `.env` file:
+```env
+# Database connection URL
+DATABASE_URL=postgresql://[user]:[password]@[host]:[port]/[database]
+
+# Session secret for authentication (can be any secure random string)
+SESSION_SECRET=your_session_secret
+```
+
+4. Set up the database
+```bash
+npm run db:push
+```
+
+5. Create an initial admin account
+```bash
+curl -X POST http://localhost:5000/api/admin/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"your-secure-password"}'
+```
+
+6. Start the development server
 ```bash
 npm run dev
 ```
 
 The application will be available at `http://localhost:5000`
 
-### Admin Access
+## Admin Access
 
-The admin interface is available at `/admin`. Contact the repository owner for admin credentials.
+To access the admin interface:
+1. Navigate to `/admin` route
+2. Log in with your admin credentials
+3. Use the admin dashboard to manage:
+   - Publications
+   - Teaching materials
+   - Research content
 
 ## Project Structure
 
@@ -65,14 +59,25 @@ The admin interface is available at `/admin`. Contact the repository owner for a
 └── shared/             # Shared types and schemas
 ```
 
-## Contributing
+## Setting Up for Development
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Clone the repository:
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin [your-github-repo-url]
+git push -u origin main
+```
 
-## License
+2. Database Setup:
+   - Create a new PostgreSQL database
+   - Update the DATABASE_URL in your .env file
+   - Run `npm run db:push` to apply the schema
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+3. Environment Variables:
+   Make sure your `.env` file includes:
+   ```env
+   DATABASE_URL=postgresql://[user]:[password]@[host]:[port]/[database]
+   SESSION_SECRET=your-secure-random-string
