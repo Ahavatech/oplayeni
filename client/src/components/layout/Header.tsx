@@ -5,8 +5,8 @@ export function Header() {
     <header className="bg-background py-8">
       <div className="container mx-auto px-4">
         <div className="flex items-start gap-6">
-          <Avatar className="h-32 w-32 rounded-full">
-            <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=professor" />
+          <Avatar className="h-32 w-32 rounded-full border-2 border-muted">
+            <AvatarImage src="/profile.jpg" alt="Professor Layeni" />
             <AvatarFallback>PL</AvatarFallback>
           </Avatar>
 
