@@ -1,18 +1,40 @@
+# Dependencies
 node_modules
 dist
 .DS_Store
 server/public
+
+# Build artifacts
 vite.config.ts.*
 *.tar.gz
+build
+coverage
+
+# Environment files
 .env
 .env.local
 .env.development
 .env.production
+
+# Logs
 *.log
 npm-debug.log*
+
+# Editor directories and files
 .vscode
-coverage
-build
 .idea
 *.swp
 *.swo
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# OS generated files
+.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# Next steps: Add your repository-specific ignores below
