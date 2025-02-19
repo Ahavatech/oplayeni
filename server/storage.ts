@@ -1,4 +1,7 @@
 import { Publication, InsertPublication, Teaching, InsertTeaching, Talk, InsertTalk, Admin, InsertAdmin } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
+import { publications, teaching, talks, admins } from "@shared/schema";
 
 export interface IStorage {
   // Admin
@@ -18,66 +21,43 @@ export interface IStorage {
   addTalk(talk: InsertTalk): Promise<Talk>;
 }
 
-export class MemStorage implements IStorage {
-  private admins: Map<number, Admin>;
-  private publications: Map<number, Publication>;
-  private teaching: Map<number, Teaching>;
-  private talks: Map<number, Talk>;
-  private currentIds: { [key: string]: number };
-
-  constructor() {
-    this.admins = new Map();
-    this.publications = new Map();
-    this.teaching = new Map();
-    this.talks = new Map();
-    this.currentIds = { admins: 1, publications: 1, teaching: 1, talks: 1 };
-  }
-
+export class DatabaseStorage implements IStorage {
   async getAdminByUsername(username: string): Promise<Admin | null> {
-    return Array.from(this.admins.values()).find(
-      (admin) => admin.username === username
-    ) || null;
+    const [admin] = await db.select().from(admins).where(eq(admins.username, username));
+    return admin || null;
   }
 
   async createAdmin(admin: InsertAdmin): Promise<Admin> {
-    const id = this.currentIds.admins++;
-    const newAdmin = { ...admin, id };
-    this.admins.set(id, newAdmin);
+    const [newAdmin] = await db.insert(admins).values(admin).returning();
     return newAdmin;
   }
 
   async getPublications(): Promise<Publication[]> {
-    return Array.from(this.publications.values());
+    return await db.select().from(publications);
   }
 
   async addPublication(pub: InsertPublication): Promise<Publication> {
-    const id = this.currentIds.publications++;
-    const publication = { ...pub, id, link: pub.link || null, abstract: pub.abstract || null };
-    this.publications.set(id, publication);
+    const [publication] = await db.insert(publications).values(pub).returning();
     return publication;
   }
 
   async getTeachingMaterials(): Promise<Teaching[]> {
-    return Array.from(this.teaching.values());
+    return await db.select().from(teaching);
   }
 
   async addTeachingMaterial(material: InsertTeaching): Promise<Teaching> {
-    const id = this.currentIds.teaching++;
-    const teachingMaterial = { ...material, id, description: material.description || null };
-    this.teaching.set(id, teachingMaterial);
+    const [teachingMaterial] = await db.insert(teaching).values(material).returning();
     return teachingMaterial;
   }
 
   async getTalks(): Promise<Talk[]> {
-    return Array.from(this.talks.values());
+    return await db.select().from(talks);
   }
 
   async addTalk(talk: InsertTalk): Promise<Talk> {
-    const id = this.currentIds.talks++;
-    const newTalk = { ...talk, id, description: talk.description || null };
-    this.talks.set(id, newTalk);
+    const [newTalk] = await db.insert(talks).values(talk).returning();
     return newTalk;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
