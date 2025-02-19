@@ -1,7 +1,4 @@
 import { Publication, InsertPublication, Teaching, InsertTeaching, Talk, InsertTalk, Admin, InsertAdmin } from "@shared/schema";
-import { db } from "./db";
-import { eq } from "drizzle-orm";
-import { publications, teaching, talks, admins } from "@shared/schema";
 
 export interface IStorage {
   // Admin
@@ -23,40 +20,39 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getAdminByUsername(username: string): Promise<Admin | null> {
-    const [admin] = await db.select().from(admins).where(eq(admins.username, username));
-    return admin || null;
+    return await Admin.findOne({ username });
   }
 
   async createAdmin(admin: InsertAdmin): Promise<Admin> {
-    const [newAdmin] = await db.insert(admins).values(admin).returning();
-    return newAdmin;
+    const newAdmin = new Admin(admin);
+    return await newAdmin.save();
   }
 
   async getPublications(): Promise<Publication[]> {
-    return await db.select().from(publications);
+    return await Publication.find();
   }
 
   async addPublication(pub: InsertPublication): Promise<Publication> {
-    const [publication] = await db.insert(publications).values(pub).returning();
-    return publication;
+    const publication = new Publication(pub);
+    return await publication.save();
   }
 
   async getTeachingMaterials(): Promise<Teaching[]> {
-    return await db.select().from(teaching);
+    return await Teaching.find();
   }
 
   async addTeachingMaterial(material: InsertTeaching): Promise<Teaching> {
-    const [teachingMaterial] = await db.insert(teaching).values(material).returning();
-    return teachingMaterial;
+    const teachingMaterial = new Teaching(material);
+    return await teachingMaterial.save();
   }
 
   async getTalks(): Promise<Talk[]> {
-    return await db.select().from(talks);
+    return await Talk.find();
   }
 
   async addTalk(talk: InsertTalk): Promise<Talk> {
-    const [newTalk] = await db.insert(talks).values(talk).returning();
-    return newTalk;
+    const newTalk = new Talk(talk);
+    return await newTalk.save();
   }
 }
 
