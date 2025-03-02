@@ -17,24 +17,20 @@ function Navbar() {
   return (
     <nav className="border-b">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <Link href="/">
-          <a className="text-xl font-bold">Academic Portfolio</a>
-        </Link>
+        <div></div> {/* Empty div to maintain flex spacing */}
         <div className="flex items-center gap-4">
-          {user ? (
+          {user?.isAdmin ? (
             <>
-              {user.isAdmin && (
-                <Link href="/admin">
-                  <Button variant="outline">Admin Dashboard</Button>
-                </Link>
-              )}
+              <Link href="/admin">
+                <Button variant="outline">Admin Dashboard</Button>
+              </Link>
               <Button variant="outline" onClick={() => logoutMutation.mutate()}>
                 Logout
               </Button>
             </>
           ) : (
             <Link href="/auth">
-              <Button>Login</Button>
+              <Button variant="ghost">Login</Button>
             </Link>
           )}
         </div>

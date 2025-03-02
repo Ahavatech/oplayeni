@@ -3,34 +3,26 @@ import { type Publication } from "@shared/schema";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function ResearchSection() {
-  const { data: publications, isLoading } = useQuery<Publication[]>({
-    queryKey: ["/api/publications"],
-  });
-
-  if (isLoading) {
-    return <ResearchSkeleton />;
-  }
-
-  return (
-    <section id="research">
-      <h2 className="text-3xl font-bold mb-8">Research Publications</h2>
-      <div className="grid gap-6">
-        {publications?.map((pub) => (
-          <PublicationCard key={pub._id} publication={pub} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function PublicationCard({ publication }: { publication: Publication }) {
   const { title, authors, journal, year, doi, abstract } = publication;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl">{title}</CardTitle>
+        <CardTitle className="text-xl">
+          {doi ? (
+            <a 
+              href={`https://doi.org/${doi}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline"
+            >
+              {title}
+            </a>
+          ) : (
+            title
+          )}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -53,6 +45,27 @@ function PublicationCard({ publication }: { publication: Publication }) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+export default function ResearchSection() {
+  const { data: publications, isLoading } = useQuery<Publication[]>({
+    queryKey: ["/api/publications"],
+  });
+
+  if (isLoading) {
+    return <ResearchSkeleton />;
+  }
+
+  return (
+    <section id="research">
+      <h2 className="text-3xl font-bold mb-8">Research Publications</h2>
+      <div className="grid gap-6">
+        {publications?.map((pub) => (
+          <PublicationCard key={pub._id} publication={pub} />
+        ))}
+      </div>
+    </section>
   );
 }
 
