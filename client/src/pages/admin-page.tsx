@@ -34,6 +34,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, LogOut } from "lucide-react";
+import React from 'react';
 
 export default function AdminPage() {
   const { user, logoutMutation } = useAuth();
@@ -101,18 +102,35 @@ function ProfileForm() {
 
   const form = useForm({
     resolver: zodResolver(insertProfileSchema),
-    defaultValues: profile || {
-      name: "",
-      title: "",
-      bio: "",
-      photoUrl: "",
+    defaultValues: {
+      name: profile?.name || "",
+      title: profile?.title || "",
+      bio: profile?.bio || "",
+      photoUrl: profile?.photoUrl || "",
       contactInfo: {
-        email: "",
-        phone: "",
-        office: "",
+        email: profile?.contactInfo?.email || "",
+        phone: profile?.contactInfo?.phone || "",
+        office: profile?.contactInfo?.office || "",
       },
     },
   });
+
+  // Update form when profile data is loaded
+  React.useEffect(() => {
+    if (profile) {
+      form.reset({
+        name: profile.name,
+        title: profile.title,
+        bio: profile.bio,
+        photoUrl: profile.photoUrl,
+        contactInfo: {
+          email: profile.contactInfo.email,
+          phone: profile.contactInfo.phone,
+          office: profile.contactInfo.office,
+        },
+      });
+    }
+  }, [profile, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: Profile) => {
@@ -143,7 +161,7 @@ function ProfileForm() {
       <CardContent>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit((data) => mutation.mutate(data as Profile))}
+            onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
             className="space-y-4"
           >
             <FormField
