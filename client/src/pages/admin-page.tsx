@@ -75,15 +75,15 @@ export default function AdminPage() {
           <TabsContent value="profile">
             <ProfileForm />
           </TabsContent>
-          
+
           <TabsContent value="courses">
             <CourseForm />
           </TabsContent>
-          
+
           <TabsContent value="publications">
             <PublicationForm />
           </TabsContent>
-          
+
           <TabsContent value="conferences">
             <ConferenceForm />
           </TabsContent>
@@ -142,7 +142,7 @@ function ProfileForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="title"
@@ -156,7 +156,7 @@ function ProfileForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="bio"
@@ -170,7 +170,7 @@ function ProfileForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="photoUrl"
@@ -184,7 +184,49 @@ function ProfileForm() {
                 </FormItem>
               )}
             />
-            
+
+            <FormField
+              control={form.control}
+              name="contactInfo.email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="contactInfo.phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone (Optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="contactInfo.office"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Office (Optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <Button type="submit" disabled={mutation.isPending}>
               {mutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -244,7 +286,7 @@ function CourseForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="code"
@@ -258,7 +300,7 @@ function CourseForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="description"
@@ -272,7 +314,7 @@ function CourseForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="semester"
@@ -286,7 +328,7 @@ function CourseForm() {
                 </FormItem>
               )}
             />
-            
+
             <Button type="submit" disabled={mutation.isPending}>
               {mutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -346,7 +388,7 @@ function PublicationForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="authors"
@@ -360,7 +402,7 @@ function PublicationForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="journal"
@@ -374,7 +416,7 @@ function PublicationForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="year"
@@ -388,7 +430,7 @@ function PublicationForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="doi"
@@ -402,7 +444,7 @@ function PublicationForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="abstract"
@@ -416,7 +458,7 @@ function PublicationForm() {
                 </FormItem>
               )}
             />
-            
+
             <Button type="submit" disabled={mutation.isPending}>
               {mutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -476,7 +518,7 @@ function ConferenceForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="venue"
@@ -490,7 +532,7 @@ function ConferenceForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="date"
@@ -504,7 +546,7 @@ function ConferenceForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="description"
@@ -518,7 +560,7 @@ function ConferenceForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="type"
@@ -532,7 +574,7 @@ function ConferenceForm() {
                 </FormItem>
               )}
             />
-            
+
             <Button type="submit" disabled={mutation.isPending}>
               {mutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
