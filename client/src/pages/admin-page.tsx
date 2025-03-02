@@ -114,8 +114,9 @@ function ProfileForm() {
       );
       return res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+    onSuccess: (updatedProfile) => {
+      queryClient.setQueryData(["/api/profile"], updatedProfile);
+      form.reset(updatedProfile);
       toast({ title: "Profile updated successfully" });
     },
   });
@@ -208,6 +209,20 @@ function ProfileForm() {
                   if (file) {
                     const formData = new FormData();
                     formData.append("photo", file);
+                    // Keep existing profile data
+                    if (profile) {
+                      Object.entries(profile).forEach(([key, value]) => {
+                        if (key !== 'photoUrl') {
+                          if (key === 'contactInfo') {
+                            Object.entries(value as Record<string, string>).forEach(([subKey, subValue]) => {
+                              formData.append(`contactInfo[${subKey}]`, subValue);
+                            });
+                          } else {
+                            formData.append(key, value as string);
+                          }
+                        }
+                      });
+                    }
                     mutation.mutate(formData);
                   }
                 }}
