@@ -34,7 +34,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, LogOut } from "lucide-react";
-import React from 'react';
 
 export default function AdminPage() {
   const { user, logoutMutation } = useAuth();
@@ -61,7 +60,7 @@ export default function AdminPage() {
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
           <Button variant="outline" onClick={() => logoutMutation.mutate()}>
             <LogOut className="h-4 w-4 mr-2" />
-            Logout
+            Logout 
           </Button>
         </div>
 
@@ -102,35 +101,8 @@ function ProfileForm() {
 
   const form = useForm({
     resolver: zodResolver(insertProfileSchema),
-    defaultValues: {
-      name: profile?.name || "",
-      title: profile?.title || "",
-      bio: profile?.bio || "",
-      photoUrl: profile?.photoUrl || "",
-      contactInfo: {
-        email: profile?.contactInfo?.email || "",
-        phone: profile?.contactInfo?.phone || "",
-        office: profile?.contactInfo?.office || "",
-      },
-    },
+    defaultValues: profile || {},
   });
-
-  // Update form when profile data is loaded
-  React.useEffect(() => {
-    if (profile) {
-      form.reset({
-        name: profile.name,
-        title: profile.title,
-        bio: profile.bio,
-        photoUrl: profile.photoUrl,
-        contactInfo: {
-          email: profile.contactInfo.email,
-          phone: profile.contactInfo.phone,
-          office: profile.contactInfo.office,
-        },
-      });
-    }
-  }, [profile, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: Profile) => {
@@ -140,13 +112,6 @@ function ProfileForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
       toast({ title: "Profile updated successfully" });
-    },
-    onError: (error: Error) => {
-      toast({ 
-        title: "Failed to update profile",
-        description: error.message,
-        variant: "destructive"
-      });
     },
   });
 
@@ -161,7 +126,7 @@ function ProfileForm() {
       <CardContent>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
+            onSubmit={form.handleSubmit((data) => mutation.mutate(data as Profile))}
             className="space-y-4"
           >
             <FormField
@@ -213,7 +178,7 @@ function ProfileForm() {
                 <FormItem>
                   <FormLabel>Photo URL</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="https://example.com/photo.jpg" />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

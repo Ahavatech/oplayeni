@@ -28,17 +28,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put("/api/profile", requireAdmin, async (req, res) => {
-    try {
-      const parsed = insertProfileSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json(parsed.error);
-      }
-      const profile = await storage.updateProfile(parsed.data);
-      res.json(profile);
-    } catch (error) {
-      console.error("[Profile Update Error]:", error);
-      res.status(500).json({ message: "Failed to update profile" });
+    const parsed = insertProfileSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json(parsed.error);
     }
+    const profile = await storage.updateProfile(parsed.data);
+    res.json(profile);
   });
 
   // Course Routes
