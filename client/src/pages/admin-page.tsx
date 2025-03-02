@@ -60,7 +60,7 @@ export default function AdminPage() {
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
           <Button variant="outline" onClick={() => logoutMutation.mutate()}>
             <LogOut className="h-4 w-4 mr-2" />
-            Logout 
+            Logout
           </Button>
         </div>
 
@@ -101,7 +101,17 @@ function ProfileForm() {
 
   const form = useForm({
     resolver: zodResolver(insertProfileSchema),
-    defaultValues: profile || {},
+    defaultValues: profile || {
+      name: "",
+      title: "",
+      bio: "",
+      photoUrl: "",
+      contactInfo: {
+        email: "",
+        phone: "",
+        office: "",
+      },
+    },
   });
 
   const mutation = useMutation({
@@ -112,6 +122,13 @@ function ProfileForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
       toast({ title: "Profile updated successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: "Failed to update profile",
+        description: error.message,
+        variant: "destructive"
+      });
     },
   });
 
@@ -178,7 +195,7 @@ function ProfileForm() {
                 <FormItem>
                   <FormLabel>Photo URL</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} placeholder="https://example.com/photo.jpg" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
