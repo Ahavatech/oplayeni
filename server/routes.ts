@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { insertProfileSchema, insertCourseSchema, insertMaterialSchema, insertPublicationSchema, insertConferenceSchema } from "@shared/schema";
+import { upload } from "./utils/upload";
 
 function requireAuth(req: any, res: any, next: any) {
   if (!req.isAuthenticated()) {
@@ -27,11 +28,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(profile);
   });
 
-  app.put("/api/profile", requireAdmin, async (req, res) => {
-    const parsed = insertProfileSchema.safeParse(req.body);
+  app.put("/api/profile", requireAdmin, upload.single("photo"), async (req, res) => {
+    const parsed = insertProfileSchema.safeParse({
+      ...req.body,
+      photoUrl: req.file?.path || req.body.photoUrl, // Use uploaded file path or existing URL
+    });
+
     if (!parsed.success) {
       return res.status(400).json(parsed.error);
     }
+
     const profile = await storage.updateProfile(parsed.data);
     res.json(profile);
   });

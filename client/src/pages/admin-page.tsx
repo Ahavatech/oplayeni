@@ -60,7 +60,7 @@ export default function AdminPage() {
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
           <Button variant="outline" onClick={() => logoutMutation.mutate()}>
             <LogOut className="h-4 w-4 mr-2" />
-            Logout 
+            Logout
           </Button>
         </div>
 
@@ -105,8 +105,13 @@ function ProfileForm() {
   });
 
   const mutation = useMutation({
-    mutationFn: async (data: Profile) => {
-      const res = await apiRequest("PUT", "/api/profile", data);
+    mutationFn: async (data: FormData | Profile) => {
+      const res = await apiRequest(
+        "PUT",
+        "/api/profile",
+        data,
+        data instanceof FormData ? { isFormData: true } : undefined
+      );
       return res.json();
     },
     onSuccess: () => {
@@ -126,7 +131,20 @@ function ProfileForm() {
       <CardContent>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit((data) => mutation.mutate(data as Profile))}
+            onSubmit={form.handleSubmit((data) => {
+              // Create a FormData object and append all fields
+              const formData = new FormData();
+              Object.entries(data).forEach(([key, value]) => {
+                if (key === 'contactInfo') {
+                  Object.entries(value as Record<string, string>).forEach(([subKey, subValue]) => {
+                    formData.append(`contactInfo[${subKey}]`, subValue);
+                  });
+                } else {
+                  formData.append(key, value as string);
+                }
+              });
+              mutation.mutate(formData);
+            })}
             className="space-y-4"
           >
             <FormField
@@ -171,19 +189,30 @@ function ProfileForm() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="photoUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Photo URL</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+            <div className="space-y-2">
+              <FormLabel>Profile Photo</FormLabel>
+              {profile?.photoUrl && (
+                <div className="relative w-32 h-32 mb-4">
+                  <img
+                    src={profile.photoUrl}
+                    alt="Current profile"
+                    className="rounded-full object-cover w-full h-full"
+                  />
+                </div>
               )}
-            />
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const formData = new FormData();
+                    formData.append("photo", file);
+                    mutation.mutate(formData);
+                  }
+                }}
+              />
+            </div>
 
             <FormField
               control={form.control}
