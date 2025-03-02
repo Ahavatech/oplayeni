@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { User, Profile, Course, CourseMaterial, Publication, Conference } from '@shared/schema';
+import { hashPassword } from './utils';
 
 if (!process.env.MONGODB_URI) {
   throw new Error('MONGODB_URI environment variable is not defined');
@@ -15,8 +16,80 @@ dbMongo.on('error', (err) => {
   console.error('[MongoDB] Connection error:', err);
 });
 
-dbMongo.once('open', () => {
+dbMongo.once('open', async () => {
   console.log('[MongoDB] Connected successfully');
+
+  try {
+    // Create admin user if none exists
+    const adminExists = await UserModel.exists({ isAdmin: true });
+    if (!adminExists) {
+      const hashedPassword = await hashPassword('admin123');
+      await UserModel.create({
+        username: 'admin',
+        password: hashedPassword,
+        isAdmin: true
+      });
+      console.log('[MongoDB] Created admin user');
+    }
+
+    // Create initial profile if none exists
+    const profileExists = await ProfileModel.exists({});
+    if (!profileExists) {
+      await ProfileModel.create({
+        name: 'Olawanle Patrick Layeni',
+        title: 'Professor of Mathematics',
+        bio: 'Specializing in solid mechanics and continuum mechanics',
+        photoUrl: 'https://placekitten.com/200/200', // Placeholder image
+        contactInfo: {
+          email: 'layeni@example.com',
+          office: 'Mathematics Department, Room 101',
+          phone: '+1234567890'
+        }
+      });
+      console.log('[MongoDB] Created initial profile');
+    }
+
+    // Add sample publication if none exist
+    const publicationsExist = await PublicationModel.exists({});
+    if (!publicationsExist) {
+      await PublicationModel.create({
+        title: 'Introduction to Continuum Mechanics',
+        authors: 'Layeni, O.P.',
+        journal: 'Journal of Mathematical Physics',
+        year: 2024,
+        doi: '10.1000/example',
+        abstract: 'A comprehensive introduction to the principles of continuum mechanics.'
+      });
+      console.log('[MongoDB] Created sample publication');
+    }
+
+    // Add sample course if none exist
+    const coursesExist = await CourseModel.exists({});
+    if (!coursesExist) {
+      await CourseModel.create({
+        title: 'Advanced Calculus',
+        code: 'MATH401',
+        description: 'In-depth study of calculus concepts including limits, derivatives, and integrals.',
+        semester: 'Spring 2024'
+      });
+      console.log('[MongoDB] Created sample course');
+    }
+
+    // Add sample conference if none exist
+    const conferencesExist = await ConferenceModel.exists({});
+    if (!conferencesExist) {
+      await ConferenceModel.create({
+        title: 'International Conference on Mathematical Physics',
+        venue: 'Virtual Conference',
+        date: new Date('2024-12-01'),
+        description: 'Annual conference bringing together researchers in mathematical physics.',
+        type: 'conference'
+      });
+      console.log('[MongoDB] Created sample conference');
+    }
+  } catch (err) {
+    console.error('[MongoDB] Error creating initial data:', err);
+  }
 });
 
 dbMongo.on('disconnected', () => {
