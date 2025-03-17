@@ -84,24 +84,30 @@ export default function AdminPage() {
 
           <TabsContent value="courses">
             <div className="space-y-8">
-              <CourseForm />
               <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
                 <div className="p-6">
                   <h3 className="text-2xl font-semibold mb-4">Existing Courses</h3>
                   <div className="space-y-4">
                     {coursesQuery.data?.map((course) => (
-                      <div key={course._id} className="flex items-center justify-between p-4 border rounded">
-                        <div>
-                          <h4 className="font-medium">{course.title}</h4>
-                          <p className="text-sm text-muted-foreground">{course.description}</p>
+                      <div key={course._id} className="space-y-4 p-4 border rounded">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium">{course.title}</h4>
+                            <p className="text-sm text-muted-foreground">{course.description}</p>
+                          </div>
                         </div>
-                        <Button variant="outline" onClick={() => navigate(`/admin/courses/${course._id}`)}>
-                          Manage Materials
-                        </Button>
+                        <div className="pt-4 border-t">
+                          <CourseUploadForm courseId={course._id} />
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
+              </div>
+              
+              <div className="pt-8 border-t">
+                <h3 className="text-2xl font-semibold mb-4">Add New Course</h3>
+                <CourseForm />
               </div>
             </div>
           </TabsContent>
