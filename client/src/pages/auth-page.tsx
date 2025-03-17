@@ -84,7 +84,9 @@ function LoginForm() {
     (data) => {
       loginMutation.mutate(data, {
         onSuccess: () => {
-          navigate('/admin');
+          if (loginMutation.data?.isAdmin) {
+            navigate('/admin', { replace: true });
+          }
         }
       });
     },
