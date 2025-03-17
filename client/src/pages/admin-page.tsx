@@ -303,7 +303,13 @@ function CourseForm() {
     },
   });
 
+  const { data: course } = useQuery<Course>({
+    queryKey: ["/api/courses"],
+  });
+
+
   return (
+    <>
     <Card>
       <CardHeader>
         <CardTitle>Add New Course</CardTitle>
@@ -384,6 +390,19 @@ function CourseForm() {
         </Form>
       </CardContent>
     </Card>
+
+    {course && (
+      <Card>
+        <CardHeader>
+          <CardTitle>Upload Course Material</CardTitle>
+          <CardDescription>Upload materials for {course.title}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CourseUploadForm courseId={course._id} />
+        </CardContent>
+      </Card>
+    )}
+    </>
   );
 }
 
@@ -630,5 +649,17 @@ function ConferenceForm() {
         </Form>
       </CardContent>
     </Card>
+  );
+}
+
+// Placeholder for CourseUploadForm component -  Requires Cloudinary integration and backend handling.
+function CourseUploadForm({ courseId }: { courseId: string }) {
+  return (
+    <div>
+      <p>Course ID: {courseId}</p>
+      <p>Upload Form Placeholder - Integrate Cloudinary here</p>
+      <input type="file" />
+      <button>Upload</button>
+    </div>
   );
 }

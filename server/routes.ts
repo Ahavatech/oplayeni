@@ -79,15 +79,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(materials);
   });
 
-  app.post("/api/courses/:courseId/materials", requireAdmin, async (req, res) => {
-    const parsed = insertMaterialSchema.safeParse({
-      ...req.body,
-      courseId: req.params.courseId,
-    });
-    if (!parsed.success) {
-      return res.status(400).json(parsed.error);
+  app.post("/api/courses/:courseId/materials/upload", requireAdmin, upload.single("file"), async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
     }
-    const material = await storage.createMaterial(parsed.data);
+
+    const fileUrl = req.file.path; // Cloudinary URL
+    const material = await storage.createMaterial({
+      courseId: req.params.courseId,
+      title: req.body.title,
+      type: req.body.type,
+      fileUrl
+    });
+    
     res.status(201).json(material);
   });
 
