@@ -84,26 +84,39 @@ export default function AdminPage() {
 
           <TabsContent value="courses">
             <div className="space-y-8">
-              <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-                <div className="p-6">
-                  <h3 className="text-2xl font-semibold mb-4">Existing Courses</h3>
-                  <div className="space-y-4">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-lg">
+                <div className="p-8">
+                  <h3 className="text-3xl font-bold mb-6">Existing Courses</h3>
+                  <div className="grid gap-6">
                     {coursesQuery.data?.map((course) => (
-                      <div key={course._id} className="space-y-4 p-4 border rounded">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="font-medium">{course.code}: {course.title}</h4>
-                            <p className="text-sm text-muted-foreground">Semester: {course.semester}</p>
-                            <p className="text-sm text-muted-foreground">Session: {course.session}</p>
-                            <p className="text-sm text-muted-foreground mt-2">{course.description}</p>
-                          </div>
-                          <div className="mt-4">
-                            <CourseUploadForm courseId={course._id} />
-                          </div>
-                          <Button 
-                            variant="destructive" 
-                            size="icon"
-                            onClick={() => {
+                      <div key={course._id} className="bg-background rounded-lg border shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <div className="p-6">
+                          <div className="flex items-start justify-between gap-6">
+                            <div className="flex-1 space-y-2">
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-xl font-semibold">{course.code}</h4>
+                                <span className="text-muted-foreground">•</span>
+                                <h4 className="text-xl">{course.title}</h4>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <span className="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full">
+                                  {course.semester}
+                                </span>
+                                <span className="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full">
+                                  {course.session}
+                                </span>
+                              </div>
+                              <p className="text-muted-foreground">{course.description}</p>
+                            </div>
+                            <div className="flex items-start gap-4">
+                              <div>
+                                <CourseUploadForm courseId={course._id} />
+                              </div>
+                              <Button 
+                                variant="destructive" 
+                                size="icon"
+                                className="opacity-70 hover:opacity-100"
+                                onClick={() => {
                               if (window.confirm('Are you sure you want to delete this course?')) {
                                 apiRequest('DELETE', `/api/courses/${course._id}`).then(() => {
                                   queryClient.invalidateQueries({ queryKey: ['/api/courses'] });
