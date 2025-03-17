@@ -32,10 +32,7 @@ function Navbar() {
                 Logout
               </Button>
             </>
-          ) : (
-            <Link href="/auth">
-              <Button>Login</Button>
-            </Link>
+          )
           )}
         </div>
       </div>
