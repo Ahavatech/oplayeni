@@ -89,7 +89,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       courseId: req.params.courseId,
       title: req.body.title,
       type: req.body.type,
-      fileUrl
+      fileUrl,
+      submissionDate: req.body.type === 'assignment' && req.body.submissionDate ? new Date(req.body.submissionDate) : undefined
     });
     
     res.status(201).json(material);

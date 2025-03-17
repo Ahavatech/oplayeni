@@ -14,7 +14,7 @@ export default function CourseUploadForm({ courseId }: { courseId: string }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  const form = useForm({
+  const form = useForm<InsertMaterial>({
     resolver: zodResolver(insertMaterialSchema),
     defaultValues: {
       courseId,
@@ -34,13 +34,13 @@ export default function CourseUploadForm({ courseId }: { courseId: string }) {
     },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = (data: InsertMaterial) => {
     const formData = new FormData();
     formData.append("file", data.file[0]);
     formData.append("title", data.title);
     formData.append("type", data.type);
     if (data.type === "assignment" && data.submissionDate) {
-      formData.append("submissionDate", data.submissionDate);
+      formData.append("submissionDate", data.submissionDate.toISOString());
     }
     uploadMutation.mutate(formData);
   };
@@ -93,7 +93,11 @@ export default function CourseUploadForm({ courseId }: { courseId: string }) {
               <FormItem>
                 <FormLabel>Submission Date</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input 
+                    type="datetime-local" 
+                    onChange={(e) => field.onChange(new Date(e.target.value))}
+                    value={field.value instanceof Date ? field.value.toISOString().slice(0, 16) : ''}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
