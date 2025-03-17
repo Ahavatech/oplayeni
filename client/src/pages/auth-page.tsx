@@ -83,8 +83,8 @@ function LoginForm() {
   const onSubmit = useCallback(
     (data) => {
       loginMutation.mutate(data, {
-        onSuccess: () => {
-          if (loginMutation.data?.isAdmin) {
+        onSuccess: (response) => {
+          if (response?.isAdmin) {
             navigate('/admin', { replace: true });
           }
         }
@@ -92,6 +92,12 @@ function LoginForm() {
     },
     [loginMutation, navigate]
   );
+
+  useEffect(() => {
+    if (user?.isAdmin) {
+      navigate('/admin', { replace: true });
+    }
+  }, [user, navigate]);
 
   return (
     <Form {...form}>
