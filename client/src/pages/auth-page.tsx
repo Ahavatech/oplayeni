@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema, type InsertUser } from "@shared/schema";
 import { useLocation } from "wouter";
@@ -80,11 +80,15 @@ function LoginForm() {
     resolver: zodResolver(insertUserSchema),
   });
 
+  const onSuccess = useCallback(() => {
+    navigate('/admin');
+  }, [navigate]);
+
   useEffect(() => {
     if (user?.isAdmin) {
-      navigate('/admin');
+      onSuccess();
     }
-  }, [user, navigate]);
+  }, [user, onSuccess]);
 
   return (
     <Form {...form}>

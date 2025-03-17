@@ -1,5 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -38,6 +39,11 @@ import { Loader2, LogOut } from "lucide-react";
 export default function AdminPage() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
+  const [, navigate] = useLocation();
+  const coursesQuery = useQuery({
+    queryKey: ["courses"],
+    queryFn: () => apiRequest("/api/courses"),
+  });
 
   if (!user?.isAdmin) {
     return (
@@ -77,7 +83,27 @@ export default function AdminPage() {
           </TabsContent>
 
           <TabsContent value="courses">
-            <CourseForm />
+            <div className="space-y-8">
+              <CourseForm />
+              <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div className="p-6">
+                  <h3 className="text-2xl font-semibold mb-4">Existing Courses</h3>
+                  <div className="space-y-4">
+                    {coursesQuery.data?.map((course) => (
+                      <div key={course._id} className="flex items-center justify-between p-4 border rounded">
+                        <div>
+                          <h4 className="font-medium">{course.title}</h4>
+                          <p className="text-sm text-muted-foreground">{course.description}</p>
+                        </div>
+                        <Button variant="outline" onClick={() => navigate(`/admin/courses/${course._id}`)}>
+                          Manage Materials
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="publications">
