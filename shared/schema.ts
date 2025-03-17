@@ -27,6 +27,7 @@ export const courseSchema = z.object({
   code: z.string().min(1, "Course code is required"),
   description: z.string().min(1, "Description is required"),
   semester: z.string().min(1, "Semester is required"),
+  session: z.string().min(1, "Session is required"),
 });
 
 export const courseMaterialSchema = z.object({

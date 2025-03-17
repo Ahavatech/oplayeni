@@ -94,7 +94,11 @@ export default function AdminPage() {
                           <div>
                             <h4 className="font-medium">{course.code}: {course.title}</h4>
                             <p className="text-sm text-muted-foreground">Semester: {course.semester}</p>
+                            <p className="text-sm text-muted-foreground">Session: {course.session}</p>
                             <p className="text-sm text-muted-foreground mt-2">{course.description}</p>
+                          </div>
+                          <div className="mt-4">
+                            <CourseUploadForm courseId={course._id} />
                           </div>
                           <Button 
                             variant="destructive" 
@@ -420,6 +424,20 @@ function CourseForm() {
                   <FormLabel>Semester</FormLabel>
                   <FormControl>
                     <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="session"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Session</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="e.g. 2023/2024" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
