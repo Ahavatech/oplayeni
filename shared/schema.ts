@@ -33,9 +33,10 @@ export const courseMaterialSchema = z.object({
   _id: z.string(),
   courseId: z.string(),
   title: z.string().min(1, "Title is required"),
-  type: z.enum(["slides", "notes", "assignment"]),
+  type: z.enum(["notes", "tutorial", "assignment"]),
   fileUrl: z.string().url("Must be a valid URL"),
   uploadedAt: z.date().default(() => new Date()),
+  submissionDate: z.date().optional(),
 });
 
 export const publicationSchema = z.object({

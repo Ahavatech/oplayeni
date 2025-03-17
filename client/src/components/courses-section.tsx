@@ -67,11 +67,11 @@ function CourseCard({ course }: { course: Course }) {
         {materials && materials.length > 0 && (
           <Tabs defaultValue="slides">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="slides">Slides</TabsTrigger>
               <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="tutorial">Tutorials</TabsTrigger>
               <TabsTrigger value="assignment">Assignments</TabsTrigger>
             </TabsList>
-            {["slides", "notes", "assignment"].map((type) => (
+            {["notes", "tutorial", "assignment"].map((type) => (
               <TabsContent key={type} value={type}>
                 <div className="space-y-2">
                   {materialsByType?.[type]?.map((material) => (

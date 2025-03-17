@@ -18,7 +18,7 @@ export default function CourseUploadForm({ courseId }: { courseId: string }) {
     resolver: zodResolver(insertMaterialSchema),
     defaultValues: {
       courseId,
-      type: "slides",
+      type: "notes",
     }
   });
 
@@ -39,6 +39,9 @@ export default function CourseUploadForm({ courseId }: { courseId: string }) {
     formData.append("file", data.file[0]);
     formData.append("title", data.title);
     formData.append("type", data.type);
+    if (data.type === "assignment" && data.submissionDate) {
+      formData.append("submissionDate", data.submissionDate);
+    }
     uploadMutation.mutate(formData);
   };
 
@@ -72,8 +75,8 @@ export default function CourseUploadForm({ courseId }: { courseId: string }) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="slides">Slides</SelectItem>
                   <SelectItem value="notes">Notes</SelectItem>
+                  <SelectItem value="tutorial">Tutorial</SelectItem>
                   <SelectItem value="assignment">Assignment</SelectItem>
                 </SelectContent>
               </Select>
@@ -81,6 +84,22 @@ export default function CourseUploadForm({ courseId }: { courseId: string }) {
             </FormItem>
           )}
         />
+
+        {form.watch("type") === "assignment" && (
+          <FormField
+            control={form.control}
+            name="submissionDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Submission Date</FormLabel>
+                <FormControl>
+                  <Input type="datetime-local" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <FormField
           control={form.control}
