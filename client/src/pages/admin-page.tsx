@@ -427,17 +427,6 @@ function CourseForm() {
       </CardContent>
     </Card>
 
-    {course && (
-      <Card>
-        <CardHeader>
-          <CardTitle>Upload Course Material</CardTitle>
-          <CardDescription>Upload materials for {course.title}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <CourseUploadForm courseId={course._id} />
-        </CardContent>
-      </Card>
-    )}
     </>
   );
 }
