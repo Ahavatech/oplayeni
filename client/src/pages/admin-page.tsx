@@ -136,6 +136,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
+
               <div className="pt-8 border-t">
                 <h3 className="text-2xl font-semibold mb-4">Add New Course</h3>
                 <CourseForm />
