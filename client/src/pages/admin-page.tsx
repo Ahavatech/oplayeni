@@ -40,7 +40,7 @@ export default function AdminPage() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
-  const coursesQuery = useQuery({
+  const coursesQuery = useQuery<Course[]>({
     queryKey: ["courses"],
     queryFn: () => apiRequest("/api/courses"),
   });
@@ -92,8 +92,9 @@ export default function AdminPage() {
                       <div key={course._id} className="space-y-4 p-4 border rounded">
                         <div className="flex items-center justify-between">
                           <div>
-                            <h4 className="font-medium">{course.title}</h4>
-                            <p className="text-sm text-muted-foreground">{course.description}</p>
+                            <h4 className="font-medium">{course.code}: {course.title}</h4>
+                            <p className="text-sm text-muted-foreground">Semester: {course.semester}</p>
+                            <p className="text-sm text-muted-foreground mt-2">{course.description}</p>
                           </div>
                         </div>
                         <div className="pt-4 border-t">
@@ -101,6 +102,9 @@ export default function AdminPage() {
                         </div>
                       </div>
                     ))}
+                    {!coursesQuery.data?.length && (
+                      <p className="text-muted-foreground">No courses found. Add a new course below.</p>
+                    )}
                   </div>
                 </div>
               </div>
