@@ -34,7 +34,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LogOut } from "lucide-react";
+import { Loader2, LogOut, Trash2 } from "lucide-react";
 
 export default function AdminPage() {
   const { user, logoutMutation } = useAuth();
@@ -96,9 +96,20 @@ export default function AdminPage() {
                             <p className="text-sm text-muted-foreground">Semester: {course.semester}</p>
                             <p className="text-sm text-muted-foreground mt-2">{course.description}</p>
                           </div>
-                        </div>
-                        <div className="pt-4 border-t">
-                          <CourseUploadForm courseId={course._id} />
+                          <Button 
+                            variant="destructive" 
+                            size="icon"
+                            onClick={() => {
+                              if (window.confirm('Are you sure you want to delete this course?')) {
+                                apiRequest('DELETE', `/api/courses/${course._id}`).then(() => {
+                                  queryClient.invalidateQueries({ queryKey: ['/api/courses'] });
+                                  toast({ title: 'Course deleted successfully' });
+                                });
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -108,7 +119,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="pt-8 border-t">
                 <h3 className="text-2xl font-semibold mb-4">Add New Course</h3>
                 <CourseForm />
