@@ -80,22 +80,20 @@ function LoginForm() {
     resolver: zodResolver(insertUserSchema),
   });
 
-  const onSuccess = useCallback(() => {
-    navigate('/admin');
-  }, [navigate]);
-
-  useEffect(() => {
-    if (user?.isAdmin) {
-      onSuccess();
-    }
-  }, [user, onSuccess]);
+  const onSubmit = useCallback(
+    (data) => {
+      loginMutation.mutate(data, {
+        onSuccess: () => {
+          navigate('/admin');
+        }
+      });
+    },
+    [loginMutation, navigate]
+  );
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => loginMutation.mutate(data))}
-        className="space-y-4"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="username"
