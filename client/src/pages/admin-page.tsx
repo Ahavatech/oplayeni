@@ -41,8 +41,8 @@ export default function AdminPage() {
   const { toast } = useToast();
   const [, navigate] = useLocation();
   const coursesQuery = useQuery<Course[]>({
-    queryKey: ["courses"],
-    queryFn: () => apiRequest("/api/courses"),
+    queryKey: ["/api/courses"],
+    queryFn: () => apiRequest("GET", "/api/courses"),
   });
 
   if (!user?.isAdmin) {
