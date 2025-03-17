@@ -73,10 +73,17 @@ export default function AuthPage() {
 }
 
 function LoginForm() {
-  const { loginMutation } = useAuth();
+  const { loginMutation, user } = useAuth();
+  const [, navigate] = useLocation();
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
   });
+
+  useEffect(() => {
+    if (user?.isAdmin) {
+      navigate('/admin');
+    }
+  }, [user, navigate]);
 
   return (
     <Form {...form}>
