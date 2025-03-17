@@ -129,13 +129,14 @@ export default function AdminPage() {
                           </Button>
                         </div>
                       </div>
-                    ))
+                    ))}
                     {!coursesQuery.data?.length && (
                       <p className="text-muted-foreground">No courses found. Add a new course below.</p>
                     )}
                   </div>
                 </div>
               </div>
+      
               <div className="pt-8 border-t">
                 <h3 className="text-2xl font-semibold mb-4">Add New Course</h3>
                 <CourseForm />
