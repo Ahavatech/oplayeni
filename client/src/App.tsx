@@ -8,8 +8,10 @@ import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import AdminPage from "@/pages/admin-page";
+import TestPage from "@/pages/test-page";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import CourseDetailPage from "@/pages/course-detail-page";
 
 function Navbar() {
   const { user, logoutMutation } = useAuth();
@@ -18,13 +20,13 @@ function Navbar() {
     <nav className="border-b">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link href="/">
-          <a className="text-xl font-bold">Academic Portfolio</a>
+          <a className="text-xl font-bold">Olawanle Patrick Layeni</a>
         </Link>
         <div className="flex items-center gap-4">
           {user ? (
             <>
               {user.isAdmin && (
-                <Link href="/admin">
+                <Link href="/admin/dashboard">
                   <Button variant="outline">Admin Dashboard</Button>
                 </Link>
               )}
@@ -50,7 +52,9 @@ function Router() {
       <Switch>
         <Route path="/" component={HomePage} />
         <Route path="/auth" component={AuthPage} />
-        <ProtectedRoute path="/admin" component={AdminPage} requireAdmin />
+        <ProtectedRoute path="/admin/dashboard" component={AdminPage} requireAdmin />
+        <ProtectedRoute path="/admin/courses/:id" component={CourseDetailPage} requireAdmin />
+        <Route path="/test" component={TestPage} />
         <Route component={NotFound} />
       </Switch>
     </>

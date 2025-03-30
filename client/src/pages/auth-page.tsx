@@ -30,7 +30,11 @@ export default function AuthPage() {
 
   // Redirect if already logged in
   if (user) {
-    navigate("/");
+    if (user.isAdmin) {
+      navigate("/admin/dashboard");
+    } else {
+      navigate("/");
+    }
     return null;
   }
 
@@ -85,7 +89,9 @@ function LoginForm() {
       loginMutation.mutate(data, {
         onSuccess: (response) => {
           if (response?.isAdmin) {
-            navigate('/admin', { replace: true });
+            navigate('/admin/dashboard', { replace: true });
+          } else {
+            navigate('/', { replace: true });
           }
         }
       });
@@ -95,7 +101,9 @@ function LoginForm() {
 
   useEffect(() => {
     if (user?.isAdmin) {
-      navigate('/admin', { replace: true });
+      navigate('/admin/dashboard', { replace: true });
+    } else if (user) {
+      navigate('/', { replace: true });
     }
   }, [user, navigate]);
 

@@ -7,6 +7,7 @@ import {
 import { UserModel, ProfileModel, CourseModel, CourseMaterialModel, PublicationModel, ConferenceModel } from "./db";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import MongoStore from "connect-mongo";
 
 const MemoryStore = createMemoryStore(session);
 
@@ -44,6 +45,8 @@ export interface IStorage {
 
   // Session Store
   sessionStore: session.Store;
+
+  getMaterial(id: string): Promise<CourseMaterial | null>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -53,6 +56,27 @@ export class DatabaseStorage implements IStorage {
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // 24h
     });
+
+    // Initialize default profile if none exists
+    this.initializeDefaultProfile();
+  }
+
+  private async initializeDefaultProfile() {
+    const profile = await ProfileModel.findOne();
+    if (!profile) {
+      await ProfileModel.create({
+        name: "Admin User",
+        title: "Professor",
+        bio: "Welcome to my academic profile.",
+        photoUrl: "",
+        contactInfo: {
+          email: "admin@example.com",
+          phone: "",
+          office: ""
+        }
+      });
+      console.log("[Storage] Created default profile");
+    }
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -155,6 +179,10 @@ export class DatabaseStorage implements IStorage {
 
   async deleteConference(id: string): Promise<void> {
     await ConferenceModel.findByIdAndDelete(id);
+  }
+
+  async getMaterial(id: string): Promise<CourseMaterial | null> {
+    return await CourseMaterialModel.findById(id);
   }
 }
 

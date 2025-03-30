@@ -3,7 +3,35 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { insertProfileSchema, insertCourseSchema, insertMaterialSchema, insertPublicationSchema, insertConferenceSchema } from "@shared/schema";
-import { upload } from "./utils/upload";
+//import { upload } from "./utils/upload";
+import fs from "fs/promises";
+import axios from "axios";
+import { v2 as cloudinary } from 'cloudinary';
+import { UploadApiOptions, UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
+import { uploadMedia } from "./utils/uploadController";
+import multer from "multer";
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const multerStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/"); // Save temporary files in 'uploads' folder
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+const upload = multer({ 
+  storage: multerStorage, 
+  limits: { fileSize: 50 * 1024 * 1024 } // Increased to 50MB
+});
+
 
 function requireAuth(req: any, res: any, next: any) {
   if (!req.isAuthenticated()) {
@@ -24,20 +52,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Profile Routes
   app.get("/api/profile", async (req, res) => {
-    const profile = await storage.getProfile();
-    res.json(profile);
+    try {
+      const profile = await storage.getProfile();
+      if (!profile) {
+        // Create a default profile if none exists
+        const defaultProfile = await storage.updateProfile({
+          name: "Admin User",
+          title: "Professor",
+          bio: "Welcome to my academic profile.",
+          photoUrl: "",
+          contactInfo: {
+            email: "admin@example.com",
+            phone: "",
+            office: ""
+          }
+        });
+        return res.json(defaultProfile);
+      }
+      res.json(profile);
+    } catch (error) {
+      console.error("[Profile] Error fetching profile:", error);
+      res.status(500).json({ error: "Failed to fetch profile" });
+    }
   });
 
-  app.put("/api/profile", requireAdmin, upload.single("photo"), async (req, res) => {
-    const parsed = insertProfileSchema.safeParse({
-      ...req.body,
-      photoUrl: req.file?.path || req.body.photoUrl, // Use uploaded file path or existing URL
-    });
+  app.post("/api/profile/upload-photo", requireAdmin, upload.single("photo"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+      
+      console.log('Upload successful:', req.file);
+      res.json({ url: req.file.path });
+    } catch (error) {
+      console.error('Error in upload route:', error);
+      res.status(500).json({ error: 'Failed to process upload' });
+    }
+  });
 
+  app.put("/api/profile", requireAdmin, async (req, res) => {
+    const parsed = insertProfileSchema.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json(parsed.error);
     }
-
     const profile = await storage.updateProfile(parsed.data);
     res.json(profile);
   });
@@ -79,21 +136,161 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(materials);
   });
 
-  app.post("/api/courses/:courseId/materials/upload", requireAdmin, upload.single("file"), async (req, res) => {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
+  app.get("/api/materials/:id/download", async (req, res) => {
+    try {
+      const material = await storage.getMaterial(req.params.id);
+      if (!material) {
+        return res.status(404).json({ error: "Material not found" });
+      }
 
-    const fileUrl = req.file.path; // Cloudinary URL
-    const material = await storage.createMaterial({
-      courseId: req.params.courseId,
-      title: req.body.title,
-      type: req.body.type,
-      fileUrl,
-      submissionDate: req.body.type === 'assignment' && req.body.submissionDate ? new Date(req.body.submissionDate) : undefined
-    });
+      // Extract file extension from the URL
+      const fileUrl = material.fileUrl;
+      const fileExtension = fileUrl.split('.').pop()?.toLowerCase() || '';
+      const fileName = `${material.title.replace(/[^a-zA-Z0-9]/g, '_')}${fileExtension ? '.' + fileExtension : ''}`;
+
+      // Check if it's an image or a raw file
+      const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileUrl);
+      
+      try {
+        if (isImage) {
+          // For images, stream directly from Cloudinary
+          const response = await axios({
+            method: 'get',
+            url: material.fileUrl,
+            responseType: 'stream'
+          });
+          
+          res.setHeader('Content-Type', `image/${fileExtension}`);
+          res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+          response.data.pipe(res);
+        } else {
+          // For raw files (PDFs, docs, etc.), use Cloudinary's download URL
+          const publicId = material.fileUrl.split('/').slice(-1)[0].split('.')[0];
+          const url = cloudinary.url(publicId, {
+            resource_type: 'raw',
+            flags: 'attachment'
+          });
+          
+          // Redirect to the download URL
+          res.redirect(url);
+        }
+      } catch (error: any) {
+        console.error("[Download] Cloudinary error:", error.message);
+        res.status(500).json({ error: "Failed to download file" });
+      }
+    } catch (error) {
+      console.error("[Download] Error downloading material:", error);
+      res.status(500).json({ error: "Failed to download material" });
+    }
+  });
+
+  function getContentType(extension: string): string {
+    const contentTypes: Record<string, string> = {
+      'pdf': 'application/pdf',
+      'doc': 'application/msword',
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'ppt': 'application/vnd.ms-powerpoint',
+      'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'gif': 'image/gif'
+    };
     
-    res.status(201).json(material);
+    return contentTypes[extension] || 'application/octet-stream';
+  }
+
+  app.post("/api/courses/:courseId/materials/upload", requireAdmin, upload.single("file"), async (req, res) => {
+    try {
+      console.log('[Upload] Request received:', {
+        file: req.file ? {
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          path: req.file.path
+        } : null,
+        body: req.body,
+        courseId: req.params.courseId
+      });
+
+      if (!req.file) {
+        console.log('[Upload] No file in request');
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      const file = req.file;
+      const { type, title } = req.body;
+
+      // Configure Cloudinary upload based on file type
+      const isImage = file.mimetype.startsWith('image/');
+      const uploadOptions: UploadApiOptions = {
+        folder: 'course-materials',
+        resource_type: isImage ? 'image' : 'raw',
+        public_id: `${Date.now()}-${file.originalname.split('.')[0]}`,
+        use_filename: true,
+        unique_filename: true
+      };
+
+      console.log('[Upload] Cloudinary options:', uploadOptions);
+
+      // Upload to Cloudinary
+      try {
+        // Read file from disk
+        const fileContent = await fs.readFile(file.path);
+        
+        const uploadResult = await new Promise<UploadApiResponse>((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            uploadOptions,
+            (error: UploadApiErrorResponse | undefined, result: UploadApiResponse | undefined) => {
+              if (error || !result) {
+                console.error('[Upload] Cloudinary upload error:', error);
+                reject(error || new Error('Upload failed'));
+              } else {
+                console.log('[Upload] Cloudinary upload success:', result.secure_url);
+                resolve(result);
+              }
+            }
+          );
+
+          // Write the file content to the upload stream
+          uploadStream.end(fileContent);
+        });
+
+        // Clean up: Delete the temporary file
+        await fs.unlink(file.path).catch(err => {
+          console.warn('[Upload] Failed to delete temporary file:', err);
+        });
+
+        console.log('[Upload] Creating material in database');
+        
+        // Create material in database
+        const material = await storage.createMaterial({
+          courseId: req.params.courseId,
+          title: title || file.originalname,
+          type,
+          fileUrl: uploadResult.secure_url,
+          submissionDate: type === 'assignment' && req.body.submissionDate 
+            ? new Date(req.body.submissionDate) 
+            : undefined
+        });
+
+        console.log('[Upload] Material created successfully:', material);
+        res.status(201).json(material);
+      } catch (uploadError) {
+        // Clean up: Delete the temporary file on error
+        await fs.unlink(file.path).catch(err => {
+          console.warn('[Upload] Failed to delete temporary file:', err);
+        });
+        console.error('[Upload] Error during upload process:', uploadError);
+        throw uploadError;
+      }
+    } catch (error: any) {
+      console.error("[Upload] Error uploading material:", error);
+      res.status(500).json({ 
+        error: "Failed to upload material", 
+        details: error.message 
+      });
+    }
   });
 
   app.delete("/api/materials/:id", requireAdmin, async (req, res) => {

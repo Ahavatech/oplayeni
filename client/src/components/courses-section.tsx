@@ -3,12 +3,18 @@ import { type Course, type CourseMaterial } from "@shared/schema";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { FileDown, Presentation, FileText, BookOpen } from "lucide-react";
+import { FileDown, Presentation, FileText, BookOpen, Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CoursesSection() {
   const { data: courses, isLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/courses");
+      return response.json();
+    }
   });
 
   if (isLoading) {
@@ -28,8 +34,13 @@ export default function CoursesSection() {
 }
 
 function CourseCard({ course }: { course: Course }) {
+  const { toast } = useToast();
   const { data: materials } = useQuery<CourseMaterial[]>({
     queryKey: ["/api/courses", course._id, "materials"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/courses/${course._id}/materials`);
+      return response.json();
+    }
   });
 
   const materialsByType = materials?.reduce((acc, material) => {
@@ -42,14 +53,53 @@ function CourseCard({ course }: { course: Course }) {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case "slides":
-        return <Presentation className="h-4 w-4" />;
       case "notes":
         return <FileText className="h-4 w-4" />;
+      case "tutorial":
+        return <Presentation className="h-4 w-4" />;
       case "assignment":
         return <BookOpen className="h-4 w-4" />;
       default:
         return <FileDown className="h-4 w-4" />;
+    }
+  };
+
+  const handleDownload = async (material: CourseMaterial) => {
+    try {
+      const response = await apiRequest(
+        "GET", 
+        `/api/materials/${material._id}/download`,
+        undefined,
+        { responseType: "blob" }
+      );
+      
+      // Create a blob from the response
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Set the download attribute with the original filename or a fallback
+      const filename = material.title.replace(/[^a-zA-Z0-9.]/g, '_');
+      link.setAttribute('download', `${filename}`);
+      
+      // Append link to body, click it, and remove it
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the temporary URL
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      toast({
+        title: "Error downloading file",
+        description: "There was a problem downloading the file. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -65,7 +115,7 @@ function CourseCard({ course }: { course: Course }) {
         <p className="text-slate-600 mb-4">{course.description}</p>
 
         {materials && materials.length > 0 && (
-          <Tabs defaultValue="slides">
+          <Tabs defaultValue="notes">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="notes">Notes</TabsTrigger>
               <TabsTrigger value="tutorial">Tutorials</TabsTrigger>
@@ -79,14 +129,18 @@ function CourseCard({ course }: { course: Course }) {
                       key={material._id}
                       variant="outline"
                       className="w-full justify-start"
-                      asChild
+                      onClick={() => handleDownload(material)}
                     >
-                      <a href={material.fileUrl} target="_blank" rel="noopener noreferrer">
-                        {getIcon(type)}
-                        <span className="ml-2">{material.title}</span>
-                      </a>
+                      {getIcon(type)}
+                      <span className="ml-2">{material.title}</span>
+                      <Download className="h-4 w-4 ml-auto" />
                     </Button>
                   ))}
+                  {(!materialsByType?.[type] || materialsByType[type].length === 0) && (
+                    <p className="text-slate-500 text-center py-4">
+                      No {type}s available
+                    </p>
+                  )}
                 </div>
               </TabsContent>
             ))}
