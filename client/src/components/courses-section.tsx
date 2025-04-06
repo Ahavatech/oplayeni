@@ -44,12 +44,17 @@ function CourseCard({ course }: { course: Course }) {
   });
 
   const materialsByType = materials?.reduce((acc, material) => {
-    if (!acc[material.type]) {
-      acc[material.type] = [];
+    const type = material.type as "notes" | "tutorial" | "assignment";
+    if (!acc[type]) {
+      acc[type] = [];
     }
-    acc[material.type].push(material);
+    acc[type].push(material);
     return acc;
-  }, {} as Record<string, CourseMaterial[]>);
+  }, {} as Record<"notes" | "tutorial" | "assignment", CourseMaterial[]>) || {
+    notes: [],
+    tutorial: [],
+    assignment: []
+  };
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -124,7 +129,7 @@ function CourseCard({ course }: { course: Course }) {
             {["notes", "tutorial", "assignment"].map((type) => (
               <TabsContent key={type} value={type}>
                 <div className="space-y-2">
-                  {materialsByType?.[type]?.map((material) => (
+                  {materialsByType[type]?.map((material) => (
                     <Button
                       key={material._id}
                       variant="outline"
@@ -136,7 +141,7 @@ function CourseCard({ course }: { course: Course }) {
                       <Download className="h-4 w-4 ml-auto" />
                     </Button>
                   ))}
-                  {(!materialsByType?.[type] || materialsByType[type].length === 0) && (
+                  {(!materialsByType[type] || materialsByType[type].length === 0) && (
                     <p className="text-slate-500 text-center py-4">
                       No {type}s available
                     </p>

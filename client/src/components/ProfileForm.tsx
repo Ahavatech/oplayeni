@@ -101,11 +101,13 @@ export function ProfileForm() {
     formData.append("photo", file);
 
     try {
-      const response = await apiRequest("POST", "/api/profile/upload-photo", formData, { isFormData: true });
-      const { url } = await response.json();
-      setFormData(prev => ({ ...prev, photoUrl: url }));
+      const response = await apiRequest("PUT", "/api/profile/upload-photo", formData, { isFormData: true });
+      const { imageUrl } = await response.json();
+      setFormData(prev => ({ ...prev, photoUrl: imageUrl }));
+      console.log(response);
       toast({ title: "Profile picture uploaded successfully" });
     } catch (error) {
+      console.log(error)
       toast({ 
         title: "Error uploading profile picture", 
         description: error instanceof Error ? error.message : "Failed to upload image",

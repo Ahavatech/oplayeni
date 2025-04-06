@@ -44,13 +44,56 @@ const courseMaterialSchema = new mongoose.Schema<CourseMaterial>({
   uploadedAt: { type: Date, default: Date.now }
 });
 
-const publicationSchema = new mongoose.Schema<Publication>({
+const upcomingTalkSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  authors: { type: String, required: true },
-  journal: { type: String, required: true },
-  year: { type: Number, required: true },
+  description: { type: String, required: true },
+  date: { type: String, required: true },
+  time: { type: String, required: true },
+  venue: { type: String, required: true },
+  flyerUrl: String,
+  registrationLink: String,
+  status: { 
+    type: String, 
+    enum: ["upcoming", "completed", "cancelled"],
+    default: "upcoming"
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+const publicationSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  abstract: { type: String, required: true },
+  authors: [{
+    name: { type: String, required: true },
+    institution: String,
+    isMainAuthor: { type: Boolean, default: false }
+  }],
+  publicationType: { 
+    type: String,
+    enum: ["journal", "conference", "book", "bookChapter", "other"],
+    required: true
+  },
+  year: { 
+    type: Number,
+    required: true,
+    min: 1900,
+    max: new Date().getFullYear() + 1
+  },
+  journal: String,
+  volume: String,
+  issue: String,
+  pages: String,
   doi: String,
-  abstract: String
+  url: String,
+  pdfUrl: String,
+  status: {
+    type: String,
+    enum: ["published", "accepted", "inPress", "underReview"],
+    default: "published"
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
 
 const conferenceSchema = new mongoose.Schema<Conference>({
@@ -62,7 +105,7 @@ const conferenceSchema = new mongoose.Schema<Conference>({
 });
 
 // Add timestamps to all models
-[userSchema, profileSchema, courseSchema, courseMaterialSchema, publicationSchema, conferenceSchema].forEach(schema => {
+[userSchema, profileSchema, courseSchema, courseMaterialSchema, upcomingTalkSchema, publicationSchema, conferenceSchema].forEach(schema => {
   schema.set('timestamps', true);
   schema.set('toObject', {
     transform: function(doc, ret) {
@@ -77,7 +120,8 @@ export const UserModel = mongoose.model<User>('User', userSchema);
 export const ProfileModel = mongoose.model<Profile>('Profile', profileSchema);
 export const CourseModel = mongoose.model<Course>('Course', courseSchema);
 export const CourseMaterialModel = mongoose.model<CourseMaterial>('CourseMaterial', courseMaterialSchema);
-export const PublicationModel = mongoose.model<Publication>('Publication', publicationSchema);
+export const UpcomingTalkModel = mongoose.model('UpcomingTalk', upcomingTalkSchema);
+export const PublicationModel = mongoose.model('Publication', publicationSchema);
 export const ConferenceModel = mongoose.model<Conference>('Conference', conferenceSchema);
 
 export async function connectDB() {
@@ -136,46 +180,57 @@ export async function connectDB() {
 async function createSamplePublication() {
   const exists = await PublicationModel.exists({});
   if (!exists) {
-    await PublicationModel.create({
-      title: 'Introduction to Continuum Mechanics',
-      authors: 'Layeni, O.P.',
-      journal: 'Journal of Mathematical Physics',
-      year: 2024,
-      doi: '10.1000/example',
-      abstract: 'A comprehensive introduction to the principles of continuum mechanics.'
-    });
-    console.log('[MongoDB] Created sample publication');
+      await PublicationModel.create({
+        title: 'Introduction to Continuum Mechanics',
+        authors: 'Layeni, O.P.',
+        journal: 'Journal of Mathematical Physics',
+        year: 2024,
+        doi: '10.1000/example',
+        abstract: 'A comprehensive introduction to the principles of continuum mechanics.'
+      });
+      console.log('[MongoDB] Created sample publication');
   }
 }
 
 async function createSampleCourse() {
   const exists = await CourseModel.exists({});
   if (!exists) {
-    await CourseModel.create({
-      title: 'Advanced Calculus',
-      code: 'MATH401',
-      description: 'In-depth study of calculus concepts including limits, derivatives, and integrals.',
-      semester: 'Spring 2024'
-    });
-    console.log('[MongoDB] Created sample course');
+      await CourseModel.create({
+        title: 'Advanced Calculus',
+        code: 'MATH401',
+        description: 'In-depth study of calculus concepts including limits, derivatives, and integrals.',
+        semester: 'Spring 2024'
+      });
+      console.log('[MongoDB] Created sample course');
   }
 }
 
 async function createSampleConference() {
   const exists = await ConferenceModel.exists({});
   if (!exists) {
-    await ConferenceModel.create({
-      title: 'International Conference on Mathematical Physics',
-      venue: 'Virtual Conference',
-      date: new Date('2024-12-01'),
-      description: 'Annual conference bringing together researchers in mathematical physics.',
-      type: 'conference'
-    });
-    console.log('[MongoDB] Created sample conference');
+      await ConferenceModel.create({
+        title: 'International Conference on Mathematical Physics',
+        venue: 'Virtual Conference',
+        date: new Date('2024-12-01'),
+        description: 'Annual conference bringing together researchers in mathematical physics.',
+        type: 'conference'
+      });
+      console.log('[MongoDB] Created sample conference');
+    }
   }
-}
 
 // Handle disconnection
 mongoose.connection.on('disconnected', () => {
   console.log('[MongoDB] Disconnected from database');
+});
+
+// Add timestamps middleware
+upcomingTalkSchema.pre('save', function(next) {
+  this.updatedAt = new Date();
+  next();
+});
+
+publicationSchema.pre('save', function(next) {
+  this.updatedAt = new Date();
+  next();
 });

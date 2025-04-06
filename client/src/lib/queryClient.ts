@@ -2,8 +2,14 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    try {
+      const errorData = await res.json();
+      throw new Error(errorData.error || res.statusText);
+    } catch (e) {
+      // If parsing JSON fails, fall back to text
+      const text = await res.text();
+      throw new Error(text || res.statusText);
+    }
   }
 }
 
@@ -13,7 +19,9 @@ export async function apiRequest(
   data?: unknown | undefined,
   options?: { isFormData?: boolean }
 ): Promise<Response> {
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = {
+    "Accept": "application/json"
+  };
 
   if (data && !options?.isFormData) {
     headers["Content-Type"] = "application/json";
@@ -26,7 +34,10 @@ export async function apiRequest(
     credentials: "include",
   });
 
-  await throwIfResNotOk(res);
+  // Clone the response before checking if it's ok
+  // This allows us to read the body multiple times if needed
+  const resClone = res.clone();
+  await throwIfResNotOk(resClone);
   return res;
 }
 

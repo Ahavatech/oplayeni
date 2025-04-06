@@ -39,41 +39,33 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen grid md:grid-cols-2">
-      <div className="flex items-center justify-center p-8">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Welcome Back</CardTitle>
-            <CardDescription>
-              Sign in to access the admin dashboard and manage your academic portfolio.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
-              </TabsList>
-              <TabsContent value="login">
-                <LoginForm />
-              </TabsContent>
-              <TabsContent value="register">
-                <RegisterForm />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="hidden md:flex bg-slate-50 p-8 items-center justify-center">
-        <div className="max-w-md space-y-4">
-          <h1 className="text-4xl font-bold">Academic Portfolio Manager</h1>
-          <p className="text-slate-600">
-            A comprehensive platform for managing your academic presence, including courses,
-            research publications, and upcoming conferences.
-          </p>
-        </div>
-      </div>
-    </div>
+    <div className="min-h-screen flex items-center justify-center">
+  <div className="w-full max-w-md p-8">
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Welcome Back</CardTitle>
+        <CardDescription>
+          Sign in to access the admin dashboard and manage your academic portfolio.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="login" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="login">Login</TabsTrigger>
+            <TabsTrigger value="register">Register</TabsTrigger>
+          </TabsList>
+          <TabsContent value="login">
+            <LoginForm />
+          </TabsContent>
+          <TabsContent value="register">
+            <RegisterForm />
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  </div>
+</div>
+
   );
 }
 
@@ -82,10 +74,14 @@ function LoginForm() {
   const [, navigate] = useLocation();
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
+    defaultValues: {
+      username: "",
+      password: ""
+    }
   });
 
   const onSubmit = useCallback(
-    (data) => {
+    (data: InsertUser) => {
       loginMutation.mutate(data, {
         onSuccess: (response) => {
           if (response?.isAdmin) {
@@ -93,10 +89,14 @@ function LoginForm() {
           } else {
             navigate('/', { replace: true });
           }
+        },
+        onError: () => {
+          // Reset password field on error
+          form.setValue("password", "");
         }
       });
     },
-    [loginMutation, navigate]
+    [loginMutation, navigate, form]
   );
 
   useEffect(() => {
@@ -117,7 +117,7 @@ function LoginForm() {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} disabled={loginMutation.isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -130,7 +130,11 @@ function LoginForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input 
+                  type="password" 
+                  {...field} 
+                  disabled={loginMutation.isPending}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -147,6 +151,11 @@ function LoginForm() {
             "Login"
           )}
         </Button>
+        {loginMutation.isError && (
+          <p className="text-sm text-destructive mt-2">
+            {loginMutation.error?.message || "Invalid credentials"}
+          </p>
+        )}
       </form>
     </Form>
   );

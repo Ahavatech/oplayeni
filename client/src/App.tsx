@@ -12,34 +12,21 @@ import TestPage from "@/pages/test-page";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import CourseDetailPage from "@/pages/course-detail-page";
+import { useQuery } from "@tanstack/react-query";
+import { Profile } from "@shared/schema";
 
 function Navbar() {
   const { user, logoutMutation } = useAuth();
+  const { data: profile } = useQuery<Profile>({
+    queryKey: ["/api/profile"],
+  });
 
   return (
     <nav className="border-b">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <Link href="/">
-          <a className="text-xl font-bold">Olawanle Patrick Layeni</a>
+        <Link href="/" className="text-xl font-bold">
+          {profile?.name || "Loading..."}
         </Link>
-        <div className="flex items-center gap-4">
-          {user ? (
-            <>
-              {user.isAdmin && (
-                <Link href="/admin/dashboard">
-                  <Button variant="outline">Admin Dashboard</Button>
-                </Link>
-              )}
-              <Button variant="outline" onClick={() => logoutMutation.mutate()}>
-                Logout
-              </Button>
-            </>
-          ) : (
-            <Link href="/auth">
-              <Button>Login</Button>
-            </Link>
-          )}
-        </div>
       </div>
     </nav>
   );

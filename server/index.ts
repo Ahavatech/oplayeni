@@ -7,7 +7,13 @@ import { connectDB } from "./db";
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "*", // Change this to your frontend domain for security (e.g., "http://yourfrontend.com")
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -48,6 +54,9 @@ async function start() {
 
     // Then set up routes and start server
     const server = await registerRoutes(app);
+
+       // Setup Vite middleware BEFORE starting the server
+    await setupVite(app, server);
     const port = process.env.PORT || 5000;
     
     server.listen(port, () => {
