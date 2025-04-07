@@ -37,5 +37,9 @@ export default defineConfig(async () => {
       host: true,
       allowedHosts: ['oplayeni.onrender.com'],
     },
+    preview: {
+      port: 4173,
+      host: true,
+    },
   };
 });
