@@ -4,34 +4,29 @@ import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { connectDB } from "./db";
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 const app = express();
 
-const allowedOrigins = [
-  'http://localhost:5173', // Vite dev server
-  'http://localhost:3000', // Alternative dev port
-  'https://ahavatech.github.io', // GitHub Pages domain
-];
+// Configure CORS based on environment
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? [process.env.FRONTEND_URL || 'https://yourusername.github.io'] 
+  : ['http://localhost:5173'];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      
-      if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-        return callback(new Error(msg), false);
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
       }
-      return callback(null, true);
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
+    credentials: true
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -70,34 +65,27 @@ async function start() {
     await connectDB();
     const server = await registerRoutes(app);
 
-    const port = process.env.PORT || 5001;
-
-    // Only use Vite dev server in development
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV === 'development') {
+      // In development, serve the frontend through Vite
       await setupVite(app, server);
     } else {
-      // Serve Vite build in production
-      const __filename = fileURLToPath(import.meta.url);
-      const __dirname = path.dirname(__filename);
-
-     
-const staticPath = path.join(process.cwd(), 'server', 'dist', 'public');
-
-app.use(express.static(staticPath));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(staticPath, 'index.html'));
-});
+      // In production, only serve API routes
+      app.use('/api', (req, res, next) => {
+        if (!req.path.startsWith('/api')) {
+          return res.status(404).json({ error: 'Not found' });
+        }
+        next();
+      });
     }
 
+    const port = process.env.PORT || 3000;
     server.listen(port, () => {
-      console.log(`[express] serving on port ${port}`);
+      console.log(`Server running on port ${port}`);
     });
   } catch (error) {
-    console.error("[Server] Failed to start:", error);
+    console.error('Failed to start server:', error);
     process.exit(1);
   }
 }
 
-
-start().catch(console.error);
+start();

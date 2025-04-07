@@ -159,10 +159,10 @@ export default function AdminPage() {
               <Settings className="h-4 w-4" />
               Settings
             </Button>
-          <Button variant="outline" onClick={() => logoutMutation.mutate()}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
+            <Button variant="outline" onClick={() => logoutMutation.mutate()}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
           </div>
         </div>
 
@@ -170,12 +170,12 @@ export default function AdminPage() {
           <AdminSettings onBack={() => setShowSettings(false)} />
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-4xl mx-auto">
-          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-4 h-auto">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="courses">Courses</TabsTrigger>
-            <TabsTrigger value="publications">Publications</TabsTrigger>
+            <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-4 h-auto">
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="courses">Courses</TabsTrigger>
+              <TabsTrigger value="publications">Publications</TabsTrigger>
               <TabsTrigger value="events">Events</TabsTrigger>
-          </TabsList>
+            </TabsList>
 
             <TabsContent value="profile">
               <div className="rounded-xl border bg-card text-card-foreground shadow-lg">
@@ -188,41 +188,41 @@ export default function AdminPage() {
 
             <TabsContent value="courses">
               <div className="space-y-8">
-              <div className="rounded-xl border bg-card text-card-foreground shadow-lg">
-                <div className="p-8">
-                  <h3 className="text-3xl font-bold mb-6">Existing Courses</h3>
-                  <div className="grid gap-6">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-lg">
+                  <div className="p-8">
+                    <h3 className="text-3xl font-bold mb-6">Existing Courses</h3>
+                    <div className="grid gap-6">
                       {coursesQuery.data?.map((course) => (
                         <div
                           key={course._id}
                           onClick={() => navigate(`/admin/courses/${course._id}`)}
                           className="bg-background rounded-lg border shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
                         >
-                          <div className="p-6">
-                            <div className="flex items-start justify-between gap-6">
-                              <div className="flex-1 space-y-2">
+                            <div className="p-6">
+                              <div className="flex items-start justify-between gap-6">
+                                <div className="flex-1 space-y-2">
                                 <h4 className="text-xl font-semibold">
                                   {course.code} - {course.title}
                                 </h4>
-                                <div className="flex gap-4">
-                                  <span className="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full">
-                                    {course.semester}
-                                  </span>
-                                  <span className="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full">
-                                    {course.session}
-                                  </span>
+                                  <div className="flex gap-4">
+                                    <span className="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full">
+                                      {course.semester}
+                                    </span>
+                                    <span className="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full">
+                                      {course.session}
+                                    </span>
+                                  </div>
+                                  <p className="text-muted-foreground">{course.description}</p>
                                 </div>
-                                <p className="text-muted-foreground">{course.description}</p>
-                              </div>
                               <div className="flex items-center gap-2">
-                                <Button
-                                  variant="destructive"
-                                  size="icon"
-                                  className="opacity-70 hover:opacity-100"
+                                  <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    className="opacity-70 hover:opacity-100"
                                   onClick={(e) => handleDeleteCourse(course._id, e)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
                                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
                               </div>
                             </div>
@@ -230,16 +230,16 @@ export default function AdminPage() {
                         </div>
                       ))}
                       {!coursesQuery.data?.length && (
-                      <p className="text-muted-foreground">No courses found. Add a new course below.</p>
-                    )}
+                        <p className="text-muted-foreground">No courses found. Add a new course below.</p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
                 <div className="rounded-xl border bg-card text-card-foreground shadow-lg">
                   <div className="p-8">
-                <h3 className="text-2xl font-semibold mb-4">Add New Course</h3>
-                <CourseForm />
+                  <h3 className="text-2xl font-semibold mb-4">Add New Course</h3>
+                  <CourseForm />
                   </div>
                 </div>
               </div>
@@ -440,10 +440,10 @@ export default function AdminPage() {
                       }}
                     />
                   </div>
+                </div>
               </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
         )}
       </div>
     </div>

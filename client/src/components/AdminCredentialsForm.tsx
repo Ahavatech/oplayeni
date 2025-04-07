@@ -7,8 +7,6 @@ import { Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
-import { apiRequest } from "@/lib/api";
-import { config } from "@/config";
 
 export function AdminCredentialsForm() {
   const { toast } = useToast();
@@ -65,7 +63,7 @@ export function AdminCredentialsForm() {
     mutationFn: async (data: typeof formData) => {
       try {
         // First check if we're still authenticated
-        const authCheckResponse = await fetch(`${config.apiBaseUrl}/api/user`, {
+        const authCheckResponse = await fetch("/api/user", {
           credentials: "include"
         });
         
@@ -75,7 +73,7 @@ export function AdminCredentialsForm() {
         }
 
         console.log("[Admin Credentials] Auth check passed, sending update request");
-        const response = await fetch(`${config.apiBaseUrl}/api/admin/credentials`, {
+        const response = await fetch("/api/admin/credentials", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
