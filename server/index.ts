@@ -64,10 +64,14 @@ async function start() {
       const __filename = fileURLToPath(import.meta.url);
       const __dirname = path.dirname(__filename);
 
-      app.use(express.static(path.join(__dirname, 'dist/public')));
-      app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, 'dist/public/index.html'));
-      });
+     
+const staticPath = path.join(process.cwd(), 'server', 'dist', 'public');
+
+app.use(express.static(staticPath));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(staticPath, 'index.html'));
+});
     }
 
     server.listen(port, () => {
