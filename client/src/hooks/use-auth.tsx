@@ -7,6 +7,7 @@ import {
 import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { config } from "../config";
 
 type AuthContextType = {
   user: SelectUser | null;
@@ -34,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
       try {
-        const res = await fetch("/api/login", {
+        const res = await fetch(`${config.apiBaseUrl}/api/login`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
