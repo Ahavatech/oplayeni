@@ -370,10 +370,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
       // Validate using Zod
       const parsed = insertPublicationSchema.safeParse(publicationData);
-      if (!parsed.success) {
+    if (!parsed.success) {
         console.error("[Validation Error]", parsed.error);
-        return res.status(400).json(parsed.error);
-      }
+      return res.status(400).json(parsed.error);
+    }
   
       let pdfUrl: string | undefined = undefined;
   
@@ -421,7 +421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pdfUrl
       });
   
-      res.status(201).json(publication);
+    res.status(201).json(publication);
     } catch (error) {
       console.error("[Publications] Error creating publication:", error);
       res.status(500).json({ error: "Failed to create publication" });
@@ -496,8 +496,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add DELETE route for publications
   app.delete("/api/publications/:id", requireAdmin, async (req, res) => {
     try {
-      await storage.deletePublication(req.params.id);
-      res.sendStatus(204);
+    await storage.deletePublication(req.params.id);
+    res.sendStatus(204);
     } catch (error) {
       console.error("[Publications] Error deleting publication:", error);
       res.status(500).json({ error: "Failed to delete publication" });
