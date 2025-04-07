@@ -34,6 +34,6 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
-    allowedHosts: ['oplayeni.onrender.com']
+    allowedHosts: ['https://oplayeni.onrender.com']
   }
 });
