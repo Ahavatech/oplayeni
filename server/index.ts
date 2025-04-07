@@ -7,26 +7,13 @@ import { connectDB } from "./db";
 
 const app = express();
 
-// Configure CORS based on environment
-const allowedOrigins = process.env.NODE_ENV === 'production' 
-  ? [process.env.FRONTEND_URL || 'https://yourusername.github.io'] 
-  : ['http://localhost:5173'];
-
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: "*", // Change this to your frontend domain for security (e.g., "http://yourfrontend.com")
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true
   })
 );
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -62,30 +49,23 @@ app.use((req, res, next) => {
 
 async function start() {
   try {
+    // Connect to MongoDB first
     await connectDB();
+
+    // Then set up routes and start server
     const server = await registerRoutes(app);
 
-    if (process.env.NODE_ENV === 'development') {
-      // In development, serve the frontend through Vite
-      await setupVite(app, server);
-    } else {
-      // In production, only serve API routes
-      app.use('/api', (req, res, next) => {
-        if (!req.path.startsWith('/api')) {
-          return res.status(404).json({ error: 'Not found' });
-        }
-        next();
-      });
-    }
-
-    const port = process.env.PORT || 3000;
+       // Setup Vite middleware BEFORE starting the server
+    await setupVite(app, server);
+    const port = process.env.PORT || 5000;
+    
     server.listen(port, () => {
-      console.log(`Server running on port ${port}`);
+      console.log(`[express] serving on port ${port}`);
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error("[Server] Failed to start:", error);
     process.exit(1);
   }
 }
 
-start();
+start().catch(console.error);
