@@ -54,7 +54,7 @@ async function start() {
     await connectDB();
     const server = await registerRoutes(app);
 
-    const port = process.env.PORT || 5000;
+    const port = process.env.PORT || 5001;
 
     // Only use Vite dev server in development
     if (process.env.NODE_ENV !== 'production') {
