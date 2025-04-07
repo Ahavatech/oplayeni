@@ -51,28 +51,25 @@ app.use((req, res, next) => {
 
 async function start() {
   try {
-    // Connect to MongoDB first
     await connectDB();
-
-    // Then set up routes and start server
     const server = await registerRoutes(app);
 
-       // Setup Vite middleware BEFORE starting the server
-    await setupVite(app, server);
     const port = process.env.PORT || 5000;
 
-    // Get __dirname in ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+    // Only use Vite dev server in development
+    if (process.env.NODE_ENV !== 'production') {
+      await setupVite(app, server);
+    } else {
+      // Serve Vite build in production
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = path.dirname(__filename);
 
-// Serve static files from Vite build
-app.use(express.static(path.join(__dirname, 'dist/public')));
+      app.use(express.static(path.join(__dirname, 'dist/public')));
+      app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, 'dist/public/index.html'));
+      });
+    }
 
-// For SPA: fallback to index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist/public/index.html'));
-});
-    
     server.listen(port, () => {
       console.log(`[express] serving on port ${port}`);
     });
@@ -81,5 +78,6 @@ app.get('*', (req, res) => {
     process.exit(1);
   }
 }
+
 
 start().catch(console.error);
