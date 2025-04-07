@@ -4,6 +4,8 @@ import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { connectDB } from "./db";
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 
@@ -58,6 +60,18 @@ async function start() {
        // Setup Vite middleware BEFORE starting the server
     await setupVite(app, server);
     const port = process.env.PORT || 5000;
+
+    // Get __dirname in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve static files from Vite build
+app.use(express.static(path.join(__dirname, 'dist/public')));
+
+// For SPA: fallback to index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist/public/index.html'));
+});
     
     server.listen(port, () => {
       console.log(`[express] serving on port ${port}`);
