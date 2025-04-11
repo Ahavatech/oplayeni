@@ -11,7 +11,7 @@ import { UploadApiOptions, UploadApiResponse, UploadApiErrorResponse } from 'clo
 import { uploadMedia } from "./utils/uploadController";
 import multer from "multer";
 import path from "path";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs"
 import { comparePasswords, hashPassword } from "./utils";
 
 // Configure Cloudinary
