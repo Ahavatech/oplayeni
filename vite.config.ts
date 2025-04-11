@@ -30,16 +30,15 @@ export default defineConfig(async () => {
     },
     root: path.resolve(__dirname, "client"),
     build: {
-      outDir: path.resolve(__dirname, "dist/public"),
+      outDir: path.resolve(__dirname, "./server/dist"), // Output files to dist folder
       emptyOutDir: true,
+      rollupOptions: {
+        input: path.resolve(__dirname, 'client', 'index.html'), // Ensure Vite knows where your index.html is
+      },
     },
     server: {
       host: true,
       allowedHosts: ['oplayeni.onrender.com'],
-    },
-    preview: {
-      port: 4173,
-      host: true,
     },
   };
 });

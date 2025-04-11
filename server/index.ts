@@ -4,22 +4,28 @@ import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { connectDB } from "./db";
+import path from 'path';
+import { fileURLToPath } from 'url'; // Add this import
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url)); // Define __dirname manually
 
 const app = express();
 
 app.use(
   cors({
-    origin: "*", // Change this to your frontend domain for security (e.g., "http://yourfrontend.com")
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000", // Change to your frontend domain in production
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
-  const path = req.path;
+  const requestPath = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
   const originalResJson = res.json;
@@ -30,8 +36,8 @@ app.use((req, res, next) => {
 
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+    if (requestPath.startsWith("/api")) {
+      let logLine = `${req.method} ${requestPath} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
@@ -47,16 +53,32 @@ app.use((req, res, next) => {
   next();
 });
 
+// Main function to start the server
 async function start() {
   try {
     // Connect to MongoDB first
     await connectDB();
 
-    // Then set up routes and start server
+    // Then set up routes and start the server
     const server = await registerRoutes(app);
 
-       // Setup Vite middleware BEFORE starting the server
-    await setupVite(app, server);
+    // Serve static files from the 'dist' folder
+     // Serve static files from 'dist' folder (this includes index.js)
+     app.use(express.static(path.join(__dirname, 'dist')));
+
+     // Serve static files from 'dist/public/assets' for assets
+     app.use(express.static(path.join(__dirname, 'dist', 'public', 'assets')));
+ 
+     // Serve the index.html from the public folder
+     app.get('*', (req, res) => {
+       res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
+     });
+
+    // Set up Vite middleware for development only
+    if (process.env.NODE_ENV === 'development') {
+      //await setupVite(app, server);
+    }
+
     const port = process.env.PORT || 5000;
     
     server.listen(port, () => {
@@ -68,4 +90,11 @@ async function start() {
   }
 }
 
+// Start the application
 start().catch(console.error);
+
+// Basic error-handling middleware
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
