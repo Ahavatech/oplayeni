@@ -30,7 +30,7 @@ export default defineConfig(async () => {
     },
     root: path.resolve(__dirname, "client"),
     build: {
-      outDir: path.resolve(__dirname, "dist"), // Output files to dist folder
+      outDir: path.resolve(__dirname, "./server/dist"), // Output files to dist folder
       emptyOutDir: true,
       rollupOptions: {
         input: path.resolve(__dirname, 'client', 'index.html'), // Ensure Vite knows where your index.html is
