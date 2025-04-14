@@ -165,11 +165,11 @@ export async function connectDB() {
     }
 
     // Add sample data
-    await Promise.all([
-      createSamplePublication(),
-      createSampleCourse(),
-      createSampleConference()
-    ]);
+    //await Promise.all([
+    //  createSamplePublication(),
+    //  createSampleCourse(),
+    //  createSampleConference()
+    //]);
 
   } catch (error) {
     console.error("[MongoDB] Connection error:", error);
@@ -182,8 +182,11 @@ async function createSamplePublication() {
   if (!exists) {
       await PublicationModel.create({
         title: 'Introduction to Continuum Mechanics',
-        authors: 'Layeni, O.P.',
+        authors: [
+          { name: "Layeni, O.P.", institution: "Some University", isMainAuthor: true }
+        ],
         journal: 'Journal of Mathematical Physics',
+        publicationType: "journal",
         year: 2024,
         doi: '10.1000/example',
         abstract: 'A comprehensive introduction to the principles of continuum mechanics.'
