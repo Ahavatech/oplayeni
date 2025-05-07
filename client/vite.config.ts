@@ -22,23 +22,28 @@ export default defineConfig(async () => {
 
   return {
     plugins,
+    base: '/1729Ramanujan1729/',
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "client", "src"),
-        "@shared": path.resolve(__dirname, "shared"),
+        "@": path.resolve(__dirname, "src"),
+        "@shared": path.resolve(__dirname, "../shared"),
       },
     },
-    root: path.resolve(__dirname, "client"),
+    root: __dirname,
     build: {
-      outDir: path.resolve(__dirname, "./server/dist"), // Output files to dist folder
+      outDir: path.resolve(__dirname, "dist"),
       emptyOutDir: true,
-      rollupOptions: {
-        input: path.resolve(__dirname, 'client', 'index.html'), // Ensure Vite knows where your index.html is
-      },
     },
     server: {
       host: true,
       allowedHosts: ['oplayeni.onrender.com'],
+      proxy: {
+        '/api': {
+          target: process.env.VITE_API_URL || 'http://localhost:3000',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
   };
 });

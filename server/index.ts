@@ -13,9 +13,12 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000", // Change to your frontend domain in production
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: [
+      'http://localhost:5173',
+      'https://1729Ramanujan1729.github.io',
+      process.env.FRONTEND_URL
+    ],
+    credentials: true
   })
 );
 
