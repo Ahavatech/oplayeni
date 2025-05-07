@@ -13,11 +13,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: [
-      'http://localhost:5173',
-      'https://1729Ramanujan1729.github.io',
-      process.env.FRONTEND_URL
-    ],
+    origin: "*",
     credentials: true
   })
 );
