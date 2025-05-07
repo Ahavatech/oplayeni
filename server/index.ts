@@ -13,11 +13,13 @@ const app = express();
 
 app.use(
   cors({
-    origin: "*",
+    origin: ["http://localhost:4173", "https://ahavatech.github.io","https://oplayeni.github.io"], // replace with your actual GitHub Pages URL
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true, // 👈 VERY important if you're using cookies or auth headers
   })
 );
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
