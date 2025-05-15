@@ -45,7 +45,7 @@ function Navbar() {
             {isLoading ? (
               <div className="h-8 w-48 bg-gray-200 animate-pulse rounded"></div>
             ) : (
-              <span>{profile?.name || "Professor's Portfolio"}</span>
+              <span>{profile?.name}</span>
             )}
           </Link>
         </div>
