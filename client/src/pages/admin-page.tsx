@@ -144,7 +144,48 @@ export default function AdminPage() {
       </div>
     );
   }
+// Add this mutation with your other mutations
+const deleteEventMutation = useMutation({
+  mutationFn: async (id: string) => {
+    console.log("[Delete Event] Attempting to delete event:", id);
+    try {
+      const response = await apiRequest("DELETE", `https://oplayeni.onrender.com/api/events/${id}`);
+      console.log("[Delete Event] Server response status:", response.status);
+      return response;
+    } catch (error) {
+      console.error("[Delete Event] Network error:", error);
+      throw error;
+    }
+  },
+  onSuccess: () => {
+    console.log("[Delete Event] Successfully deleted, invalidating queries");
+    queryClient.invalidateQueries({ queryKey: ["events"] });
+    toast({ title: "Event deleted successfully" });
+  },
+  onError: (error: Error) => {
+    console.error("[Delete Event] Error:", error);
+    toast({
+      title: "Error deleting event",
+      description: error.message,
+      variant: "destructive",
+    });
+  },
+});
 
+// Add this handler function with your other handlers
+const handleDeleteEvent = (id: string) => {
+  deleteEventMutation.mutate(id);
+};
+
+// Then update the EventList component in the JSX to use the new handler
+<EventList 
+  talks={(eventsQuery.data || []).filter(Boolean)}
+  isAdmin={true}
+  onEdit={(event) => {
+    // TODO: Implement edit functionality
+  }}
+  onDelete={handleDeleteEvent}
+/>
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto px-4 py-8">
