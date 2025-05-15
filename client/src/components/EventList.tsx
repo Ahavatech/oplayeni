@@ -50,12 +50,23 @@ export function EventList({ talks = [], isAdmin, onEdit, onDelete }: EventListPr
     }
   };
 
+  const handleDelete = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this event?')) {
+      try {
+        onDelete?.(id);
+      } catch (error) {
+        console.error('Error deleting event:', error);
+      }
+    }
+  };
+
   if (!Array.isArray(talks)) {
     console.error('Events is not an array:', talks);
     return null;
   }
 
-  // Filter out any invalid talk objects
   const validTalks = talks.filter(talk => 
     talk && 
     typeof talk === 'object' && 
@@ -78,7 +89,10 @@ export function EventList({ talks = [], isAdmin, onEdit, onDelete }: EventListPr
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <Badge variant={talk.status === 'upcoming' ? 'default' : talk.status === 'completed' ? 'secondary' : 'destructive'}>
+              <Badge 
+                variant={talk.status === 'upcoming' ? 'default' : 
+                        talk.status === 'completed' ? 'secondary' : 'destructive'}
+              >
                 {talk.status.charAt(0).toUpperCase() + talk.status.slice(1)}
               </Badge>
               {isAdmin && (
@@ -94,7 +108,7 @@ export function EventList({ talks = [], isAdmin, onEdit, onDelete }: EventListPr
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => onDelete?.(talk._id)}
+                    onClick={(e) => handleDelete(talk._id, e)}
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
                     Delete
@@ -152,4 +166,4 @@ export function EventList({ talks = [], isAdmin, onEdit, onDelete }: EventListPr
       )}
     </div>
   );
-} 
+}
