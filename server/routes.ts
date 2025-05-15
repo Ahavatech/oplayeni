@@ -576,6 +576,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(500).json({ error: "Failed to upload flyer" });
         }
       }
+      // Add this with your other event routes
+app.delete("/api/events/:id", requireAdmin, async (req, res) => {
+  try {
+    console.log("[Events] Attempting to delete event:", req.params.id);
+    await storage.deleteUpcomingTalk(req.params.id);
+    console.log("[Events] Successfully deleted event:", req.params.id);
+    res.sendStatus(204);
+  } catch (error) {
+    console.error("[Events] Error deleting event:", error);
+    res.status(500).json({ error: "Failed to delete event" });
+  }
+});
 
       // Set status based on date
       const eventDate = new Date(parsed.data.date);
